@@ -54,6 +54,7 @@ namespace FinalBattlee
                 Console.WriteLine($"#{i} {action.Name}");
                 i++;
             }
+
             Console.WriteLine("++++++++++++++++++++++++++++++++++++");
             Console.Write("Option: ");
             int choice = ValidateTargetInput(unit.Actions);
@@ -76,35 +77,52 @@ namespace FinalBattlee
             Console.WriteLine("++++++++++++++++++++++++++++++++++++");
             Console.WriteLine("Select a Target: ");
 
-            for (int i = 0; i < potentialTargets.Count; i++)
+            int i;
+            for (i = 0; i < potentialTargets.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {potentialTargets[i].Name}");
             }
+
+            i++;
+            Console.WriteLine($"{i}. Back to Menu");
+
             Console.WriteLine("++++++++++++++++++++++++++++++++++++");
+
             Console.Write("Option: ");
             int choice = ValidateTargetInput(potentialTargets);
             Console.WriteLine("------------------------------------");
 
-            return potentialTargets[choice - 1];
+            if (choice == potentialTargets.Count + 1) return null;
+
+            else return potentialTargets[choice - 1];
+
         }
 
         public Item GetItemChoice(Party party)
         {
             Console.WriteLine("++++++++++++++++++++++++++++++++++++");
             Console.WriteLine("Select an Item: ");
-            for (int i = 0; i < party.Inventory.Count; i++)
+
+            int i;
+            for (i = 0; i < party.Inventory.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {party.Inventory[i].Name}");
             }
+
+            i++;
+            Console.WriteLine($"{i}. Back to Menu");
+
             Console.WriteLine("++++++++++++++++++++++++++++++++++++");
             Console.Write("Option: ");
             int choice = ValidateTargetInput(party.Inventory);
+
             Console.WriteLine("------------------------------------");
 
-            return party.Inventory[choice - 1];
+            if (choice == party.Inventory.Count + 1) return null;
+            else return party.Inventory[choice - 1];
         }
 
-        public int ValidateTargetInput<T>(List<T> targets)                   // yeah, I looked this up too, though it took some effort to actually make it work
+        public int ValidateTargetInput<T>(List<T> targets)                   
         {
             while (true)
             {
@@ -114,21 +132,12 @@ namespace FinalBattlee
                 if (!valid) { Console.WriteLine("Not a valid option. Please choose again."); continue; }
                 //Console.WriteLine($"DEBUG: print choice: {choice}");
 
-                if (choice > targets.Count || choice < 0) { Console.WriteLine("Not a valid option. Please choose again."); continue; }
+                if (choice > targets.Count + 1 || choice < 0) { Console.WriteLine("Not a valid option. Please choose again."); continue; }
                 //Console.WriteLine($"DEBUG: print count {targets.Count}");
                 return choice;
             }
         }
 
-        //public int ValidateItemInput(Party party)                   // I think I could maybe use delegates to make it so I can pass in any list and make sure the choice is within the bounds
-        //{
-        //    while (true)
-        //    {
-        //        int choice = int.Parse(Console.ReadLine());
-        //        if (choice > party.Inventory.Count || choice < party.Inventory.Count) { Console.WriteLine("Not a valid option. Please choose again."); }
-        //        else return choice;
-        //    }
-        //}
     }
 
 }

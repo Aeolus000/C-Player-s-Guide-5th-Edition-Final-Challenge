@@ -60,41 +60,57 @@ namespace FinalBattlee
         public void TakeTurn(Party party)
         {
 
+            bool targetChosen = false;
+
             foreach (Unit unit in party.Units)
             {
-                UI.PrintGameStatus();
-                UnitAction action = UI.GetUnitAction(unit);
-                if (action is DoNothing )
+
+                while (!targetChosen)
                 {
-                    action.RunAction(unit, unit);      // skip targeting for DoNothing, not sure a better way to do this yet
+                    UI.PrintGameStatus();
+                    UnitAction action = UI.GetUnitAction(unit);
+                     
+                    if (action is DoNothing)
+                    {
+                        action.RunAction(unit, unit);      
+                    }
+                    else if (action is UseItem)
+                    {
+                        Item item = UI.GetItemChoice(party);
+                        //Console.WriteLine($"DEBUG: {item.Name} is item selected");
+
+                        if (item == null) continue;
+
+                        var potentialTargets = GetFriendlyPartyForUnit(unit);
+                        Unit target = UI.GetTarget(potentialTargets);                   
+
+                        if (target == null) continue;
+
+
+                        item.Use(target);
+                        party.Inventory.Remove(item);                                   
+
+                        Thread.Sleep(1000);
+                    }
+                    else
+                    {
+                        var potentialTargets = GetEnemyPartyForUnit(unit);
+                        Unit target = UI.GetTarget(potentialTargets);
+
+                        if (target == null) continue;
+
+                        action.RunAction(unit, target);
+                        Thread.Sleep(1000);
+                        DeathCheck(target);
+                    }
+
+                    targetChosen = true;
                 }
-                else if (action is UseItem)
-                {
-                    Item item = UI.GetItemChoice(party);
-                    //Console.WriteLine($"DEBUG: {item.Name} is item selected");
-
-                    var potentialTargets = GetFriendlyPartyForUnit(unit);
-                    Unit target = UI.GetTarget(potentialTargets);                   // I tried to simply put party.Units in this method for friendly units but it doesn't like that it's readonly so I have to do it this obtuse way
-
-                    //Console.WriteLine($"DEBUG: Item target: {target.Name}");
-
-                    item.Use(target);
-                    party.Inventory.Remove(item);                                   // it does feel weird that Battle is responsible for deleting an item after use. I feel like the potion should delete itself. Or maybe Party should have UseItem instead.
-
-                    Thread.Sleep(1000);
-                }
-                else
-                {
-                    var potentialTargets = GetEnemyPartyForUnit(unit);
-                    Unit target = UI.GetTarget(potentialTargets);
-                    action.RunAction(unit, target);
-                    Thread.Sleep(1000);
-                    DeathCheck(target);
-                }
+                
             }
         }
 
-        public void ComputerTakeTurn(Party party)                                                               // is it bad that the "AI" decision making is in the battle class? I mean... we need all the information to make decisions. So I think it's okay.
+        public void ComputerTakeTurn(Party party)                                                              
         {
             foreach (Unit u in party.Units)                                                                     // this has to be bad and is obviously NOT sustainable in any way... but i'm not sure how else to do it
             {
